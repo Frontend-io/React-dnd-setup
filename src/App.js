@@ -1,13 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import { DragDropContext } from "react-beautiful-dnd";
 import Column from "../column";
 import intitial from "../data";
 import "./styles.css";
 
 export default function App() {
-  const state = intitial;
+  const [state, setState] = useState(intitial);
+
   const onDragEnd = (result) => {
+    const { destination, source, draggableId } = result;
     console.log(result);
+    if (!destination) {
+      return;
+    }
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+    const column = state.columns[source.droppableId];
+    const newTaskIds = Array.from(column.taskIds);
+    newTaskIds.splice(source.index, 1);
+    newTaskIds.splice(destination.index, 0, draggableId);
+
+    const newColumn = {
+      ...column,
+      taskIds: newTaskIds
+    };
+    const newState = {
+      ...state,
+      columns: {
+        ...state.columns,
+        [newColumn.id]: newColumn
+      }
+    };
+    setState(newState);
   };
 
   return (
